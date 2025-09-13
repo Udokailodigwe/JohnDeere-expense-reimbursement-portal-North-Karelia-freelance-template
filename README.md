@@ -1,4 +1,4 @@
-# John Deere Expense Reimbursement Portal - Backend API
+# John Deere (North Karelia, Joensuu) Expense Reimbursement Portal (freelance_template) - Backend API
 
 A robust REST API backend for John Deere's expense management system, providing secure endpoints for contractors and drivers to submit, track, and manage expense reimbursements.
 
@@ -297,8 +297,8 @@ This project is proprietary software for John Deere. All rights reserved.
 
 ## 📞 Support
 
-For API support and questions, please contact the backend development team.
+For API support and questions, please contact the development team.
 
 ---
 
-**© 2024 John Deere. All rights reserved.**
+**© 2025 John Deere. All rights reserved.**
