@@ -35,7 +35,7 @@ export const registerValidationSchema = Joi.object({
   active: Joi.boolean().default(false),
 });
 
-export const passwordResetSchema = Joi.object({
+export const activateAccountSchema = Joi.object({
   email: Joi.string()
     .email({ tlds: { allow: false } })
     .required()
@@ -46,26 +46,18 @@ export const passwordResetSchema = Joi.object({
       "any.required": "Email is required",
     }),
 
-  oneTimePassword: Joi.string().required().messages({
-    "string.base": "Current password should be a type of text",
-    "string.empty": "Current password is required",
-    "any.required": "Current password is required",
+  code: Joi.string().required().messages({
+    "string.base": "Code should be a type of text",
+    "string.empty": "Code is required",
+    "any.required": "Code is required",
   }),
 
-  newPassword: Joi.string().min(8).required().messages({
-    "string.base": "New password should be a type of text",
-    "string.empty": "New password is required",
-    "string.min": "New password must be at least 8 characters long",
-    "any.required": "New password is required",
+  password: Joi.string().min(8).required().messages({
+    "string.base": "Password should be a type of text",
+    "string.empty": "Password is required",
+    "string.min": "Password must be at least 8 characters long",
+    "any.required": "Password is required",
   }),
-
-  confirmNewPassword: Joi.string()
-    .valid(Joi.ref("newPassword"))
-    .required()
-    .messages({
-      "any.only": "Passwords must match",
-      "any.required": "Please confirm your password",
-    }),
 });
 
 export const loginValidationSchema = Joi.object({

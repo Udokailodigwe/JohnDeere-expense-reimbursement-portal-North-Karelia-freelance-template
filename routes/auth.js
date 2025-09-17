@@ -1,10 +1,10 @@
 import express from "express";
-import { login, resetPassword, register } from "../controllers/auth.js";
+import { login, activateAccount, register } from "../controllers/auth.js";
 import { validate } from "../middleware/validate-request.js";
 import {
   registerValidationSchema,
   loginValidationSchema,
-  passwordResetSchema,
+  activateAccountSchema,
 } from "../data/userValidation-schema.js";
 import {
   requireRole,
@@ -43,6 +43,10 @@ router.post(
 
 router.post("/login", validate(loginValidationSchema), login);
 
-router.post("/reset-password", validate(passwordResetSchema), resetPassword);
+router.post(
+  "/activate-account",
+  validate(activateAccountSchema),
+  activateAccount
+);
 
 export default router;

@@ -37,6 +37,7 @@ export const register = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      active: user.active,
     },
     tempPassword: tempPassword,
   });
@@ -55,13 +56,13 @@ export const login = async (req, res) => {
 
   const isPasswordCorrect = await user.comparePassword(password);
   if (!isPasswordCorrect) {
-    throw new UnauthenticatedError("Invalid credentials");
+    throw new UnauthenticatedError("Password is incorrect");
   }
 
   if (!user.active) {
     return res.status(403).json({
       message:
-        "You must set your personal password before login. Use reset-password link to set your password",
+        "You must set your personal password before login. Use activate-account link to set your password",
     });
   }
 
@@ -72,14 +73,16 @@ export const login = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      active: user.active,
+      approvals: user.approvals,
       token,
     },
   });
 };
 
-export const resetPassword = async (req, res) => {
-  const { email, oneTimePassword, newPassword } = req.body;
-  if (!email || !oneTimePassword || !newPassword) {
+export const activateAccount = async (req, res) => {
+  const { email, code, password } = req.body;
+  if (!email || !code || !password) {
     throw new BadRequestError("Please provide required credentials");
   }
 
@@ -89,8 +92,8 @@ export const resetPassword = async (req, res) => {
   }
 
   // Verify the current password (temporary password)
-  const isOneTimePasswordCorrect = await user.comparePassword(oneTimePassword);
-  if (!isOneTimePasswordCorrect) {
+  const isCodeCorrect = await user.comparePassword(code);
+  if (!isCodeCorrect) {
     throw new UnauthenticatedError("Invalid one-time password");
   }
 
@@ -101,7 +104,7 @@ export const resetPassword = async (req, res) => {
     );
   }
 
-  user.password = newPassword;
+  user.password = password;
   user.active = true;
   await user.save();
   const token = user.createJWT();
@@ -112,6 +115,7 @@ export const resetPassword = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      active: user.active,
       token,
     },
   });
