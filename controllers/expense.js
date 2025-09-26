@@ -31,11 +31,18 @@ export const getExpenses = async (req, res) => {
     if (endDate) query.expenseDate.$lte = new Date(endDate);
   }
 
-  const expenses = await Expense.find(query)
-    .populate("userId", "name email")
-    .sort({ expenseDate: -1 });
+  const [expenses, totalExpenses] = await Promise.all([
+    Expense.find(query)
+      .populate("userId", "name email")
+      .sort({ expenseDate: -1 }),
+    Expense.countDocuments(query),
+  ]);
 
-  res.status(StatusCodes.OK).json({ expenses });
+  res.status(StatusCodes.OK).json({
+    message: "Expenses retrieved successfully",
+    totalExpenses,
+    expenses,
+  });
 };
 
 export const getAllEmployeeExpenses = async (req, res) => {
@@ -59,13 +66,16 @@ export const getAllEmployeeExpenses = async (req, res) => {
     if (endDate) query.expenseDate.$lte = new Date(endDate);
   }
 
-  const expenses = await Expense.find(query)
-    .populate("userId", "name email")
-    .sort({ expenseDate: -1 });
+  const [expenses, totalExpenses] = await Promise.all([
+    Expense.find(query)
+      .populate("userId", "name email")
+      .sort({ expenseDate: -1 }),
+    Expense.countDocuments(query),
+  ]);
 
   res.status(StatusCodes.OK).json({
-    message: "All expenses retrieved successfully",
-    count: expenses.length,
+    message: "All employeeexpenses retrieved successfully",
+    totalExpenses,
     expenses,
   });
 };
