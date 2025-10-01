@@ -19,7 +19,10 @@ export const getExpenses = async (req, res) => {
   const queryData = req.validatedQuery || req.query;
   const { status, category, startDate, endDate } = queryData;
 
-  const query = { userId: req.user.userId };
+  const query = {
+    userId: req.user.userId,
+    isDeleted: false, // Exclude soft-deleted expenses
+  };
 
   if (status) query.status = status;
   if (category) query.category = category;
@@ -50,16 +53,15 @@ export const getAllEmployeeExpenses = async (req, res) => {
   const queryData = req.validatedQuery || req.query;
   const { status, category, startDate, endDate, userId } = queryData;
 
-  // Start with empty query - managers can see all expenses
-  const query = {};
+  const query = {
+    isDeleted: false, // Exclude soft-deleted expenses
+  };
 
-  // Filter by specific user if provided
   if (userId) query.userId = userId;
 
   if (status) query.status = status;
   if (category) query.category = category;
 
-  // Date range filter
   if (startDate || endDate) {
     query.expenseDate = {};
     if (startDate) query.expenseDate.$gte = new Date(startDate);
@@ -74,7 +76,7 @@ export const getAllEmployeeExpenses = async (req, res) => {
   ]);
 
   res.status(StatusCodes.OK).json({
-    message: "All employeeexpenses retrieved successfully",
+    message: "All employe eexpenses retrieved successfully",
     totalExpenses,
     expenses,
   });
@@ -132,5 +134,28 @@ export const updateExpense = async (req, res) => {
   res.status(StatusCodes.OK).json({
     message: "Expense updated successfully",
     expense,
+  });
+};
+
+export const deleteExpense = async (req, res) => {
+  const { id } = req.params;
+
+  // Soft delete the expense
+  const expense = await Expense.findByIdAndUpdate(
+    id,
+    {
+      isDeleted: true,
+      deletedAt: new Date(),
+    },
+    { new: true }
+  );
+
+  if (!expense) {
+    throw new NotFoundError("Expense not found");
+  }
+
+  res.status(StatusCodes.OK).json({
+    message: "Expense deleted successfully",
+    expenseId: id,
   });
 };

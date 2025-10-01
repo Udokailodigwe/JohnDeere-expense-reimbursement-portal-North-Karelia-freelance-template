@@ -5,49 +5,40 @@ import User from "../models/user.js";
 import { StatusCodes } from "http-status-codes";
 import { BadRequestError, NotFoundError } from "../errors/index.js";
 
-// Get manager's approval history
-export const getManagerApprovals = async (req, res) => {
-  const managerId = req.user.userId;
-
-  const manager = await User.findById(managerId).populate({
-    path: "approvals",
-    select: "status date rejectReason expenseId",
-    populate: {
+// Get all approvals
+export const getAllApprovals = async (req, res) => {
+  const approvals = await Approval.find({})
+    .populate({
       path: "expenseId",
       select: "amount description category expenseDate userId",
       populate: {
         path: "userId",
-        select: "name email",
+        select: "name email role",
       },
-    },
-  });
+    })
+    .populate({
+      path: "managerId",
+      select: "name email role",
+    })
+    .sort({ date: -1 });
 
-  if (!manager) {
-    throw new NotFoundError("Manager not found");
-  }
-
-  // Calculate statistics
-  const numOfTreatedExpenses = manager.approvals.length;
-  const approvedCount = manager.approvals.filter(
+  // approvals stats
+  const numOfTreatedExpenses = approvals.length;
+  const approvedCount = approvals.filter(
     (approval) => approval.status === "approved"
   ).length;
-  const rejectedCount = manager.approvals.filter(
+  const rejectedCount = approvals.filter(
     (approval) => approval.status === "rejected"
   ).length;
 
   res.status(StatusCodes.OK).json({
-    message: "Manager approval history retrieved successfully",
-    manager: {
-      name: manager.name,
-      email: manager.email,
-      role: manager.role,
-    },
-    stats: {
+    message: "All approvals retrieved successfully",
+    statistics: {
       numOfTreatedExpenses,
       approvedCount,
       rejectedCount,
     },
-    finalizedExpenses: manager.approvals,
+    approvals: approvals,
   });
 };
 
@@ -62,7 +53,7 @@ export const getEmployeeApprovals = async (req, res) => {
     .populate({
       path: "expenseId",
       match: { userId: new mongoose.Types.ObjectId(userId) },
-      select: "amount description category expenseDate status",
+      select: "amount description category expenseDate notes status",
     })
     .populate({
       path: "managerId",
@@ -87,7 +78,7 @@ export const getEmployeeApprovals = async (req, res) => {
   const employee = await User.findById(userId).select("name email role");
 
   res.status(StatusCodes.OK).json({
-    message: "Processed expenses",
+    message: "Resolved expenses",
     employee: {
       name: employee.name,
       email: employee.email,

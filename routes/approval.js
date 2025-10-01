@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  getManagerApprovals,
+  getAllApprovals,
   getEmployeeApprovals,
   approveExpense,
 } from "../controllers/approval.js";
@@ -11,23 +11,18 @@ import { approveExpenseSchema } from "../data/expenseValidation-schema.js";
 const router = express.Router();
 
 // Get manager's approval history
-router.get(
-  "/manager",
-  authenticate,
-  requireRole("manager"),
-  getManagerApprovals
-);
+router.get("/all", authenticate, requireRole("manager"), getAllApprovals);
 
 // Get employee's approved expenses history
 router.get(
-  "/employee",
+  "/",
   authenticate,
-  requireRole("employee"),
+  // requireRole(["employee", "manager"]),
   getEmployeeApprovals
 );
 
 // Approve/reject expense (manager only)
-router.patch(
+router.put(
   "/:id",
   authenticate,
   requireRole("manager"),

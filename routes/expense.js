@@ -5,6 +5,7 @@ import {
   getAllEmployeeExpenses,
   getExpenseById,
   updateExpense,
+  deleteExpense,
 } from "../controllers/expense.js";
 import { validate } from "../middleware/validate-request.js";
 import { authenticate, requireRole } from "../middleware/auth.js";
@@ -44,5 +45,7 @@ router.get(
 );
 
 router.put("/:id", authenticate, validate(updateExpenseSchema), updateExpense);
+
+router.delete("/:id", authenticate, deleteExpense);
 
 export default router;
