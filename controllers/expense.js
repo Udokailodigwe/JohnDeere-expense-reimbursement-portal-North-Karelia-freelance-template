@@ -1,12 +1,38 @@
 import Expense from "../models/expense.js";
+import User from "../models/user.js";
 import { StatusCodes } from "http-status-codes";
 import { pickFields, parseDate } from "../utils/utility.js";
 import { BadRequestError, NotFoundError } from "../errors/index.js";
+import { sendEmail } from "../utils/sendEmail.js";
+import {
+  expenseSubmittedTemplate,
+  expenseCreatedConfirmationTemplate,
+} from "../utils/emailTemplate.js";
 
 export const createExpense = async (req, res) => {
   req.body.userId = req.user.userId;
-
   const expense = await Expense.create(req.body);
+
+  const employee = await User.findById(req.user.userId).select("name email");
+  const manager = await User.findOne({ role: "manager" }).select("name email");
+
+  try {
+    await sendEmail({
+      to: employee.email,
+      subject: "Expense Submitted Successfully",
+      html: expenseCreatedConfirmationTemplate(employee, expense),
+    });
+
+    if (manager) {
+      await sendEmail({
+        to: manager.email,
+        subject: `New Expense Submission from ${employee.name}`,
+        html: expenseSubmittedTemplate(manager, employee, expense),
+      });
+    }
+  } catch (error) {
+    console.log("Email notification failed:", error);
+  }
 
   res.status(StatusCodes.CREATED).json({
     message: "Expense submitted successfully",
@@ -17,7 +43,14 @@ export const createExpense = async (req, res) => {
 export const getExpenses = async (req, res) => {
   // Use validated query data if available, otherwise fall back to req.query
   const queryData = req.validatedQuery || req.query;
-  const { status, category, startDate, endDate } = queryData;
+  const {
+    status,
+    category,
+    startDate,
+    endDate,
+    page = 1,
+    limit = 10,
+  } = queryData;
 
   const query = {
     userId: req.user.userId,
@@ -34,24 +67,50 @@ export const getExpenses = async (req, res) => {
     if (endDate) query.expenseDate.$lte = new Date(endDate);
   }
 
+  // Calculate pagination
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
   const [expenses, totalExpenses] = await Promise.all([
     Expense.find(query)
       .populate("userId", "name email")
-      .sort({ expenseDate: -1 }),
+      .sort({ expenseDate: -1 })
+      .skip(skip)
+      .limit(parseInt(limit)),
     Expense.countDocuments(query),
   ]);
+
+  // Calculate pagination info
+  const totalPages = Math.ceil(totalExpenses / parseInt(limit));
+  const hasNextPage = parseInt(page) < totalPages;
+  const hasPrevPage = parseInt(page) > 1;
 
   res.status(StatusCodes.OK).json({
     message: "Expenses retrieved successfully",
     totalExpenses,
     expenses,
+    pagination: {
+      currentPage: parseInt(page),
+      totalPages,
+      hasNextPage,
+      hasPrevPage,
+      limit: parseInt(limit),
+      totalItems: totalExpenses,
+    },
   });
 };
 
 export const getAllEmployeeExpenses = async (req, res) => {
   // Use validated query data if available, otherwise fall back to req.query
   const queryData = req.validatedQuery || req.query;
-  const { status, category, startDate, endDate, userId } = queryData;
+  const {
+    status,
+    category,
+    startDate,
+    endDate,
+    userId,
+    page = 1,
+    limit = 10,
+  } = queryData;
 
   const query = {
     isDeleted: false, // Exclude soft-deleted expenses
@@ -68,17 +127,35 @@ export const getAllEmployeeExpenses = async (req, res) => {
     if (endDate) query.expenseDate.$lte = new Date(endDate);
   }
 
+  // Calculate pagination
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
   const [expenses, totalExpenses] = await Promise.all([
     Expense.find(query)
       .populate("userId", "name email")
-      .sort({ expenseDate: -1 }),
+      .sort({ expenseDate: -1 })
+      .skip(skip)
+      .limit(parseInt(limit)),
     Expense.countDocuments(query),
   ]);
 
+  // Calculate pagination info
+  const totalPages = Math.ceil(totalExpenses / parseInt(limit));
+  const hasNextPage = parseInt(page) < totalPages;
+  const hasPrevPage = parseInt(page) > 1;
+
   res.status(StatusCodes.OK).json({
-    message: "All employe eexpenses retrieved successfully",
+    message: "All employee expenses retrieved successfully",
     totalExpenses,
     expenses,
+    pagination: {
+      currentPage: parseInt(page),
+      totalPages,
+      hasNextPage,
+      hasPrevPage,
+      limit: parseInt(limit),
+      totalItems: totalExpenses,
+    },
   });
 };
 

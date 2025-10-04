@@ -4,6 +4,8 @@ import Approval from "../models/approval.js";
 import User from "../models/user.js";
 import { StatusCodes } from "http-status-codes";
 import { BadRequestError, NotFoundError } from "../errors/index.js";
+import { sendEmail } from "../utils/sendEmail.js";
+import { expenseStatusUpdateTemplate } from "../utils/emailTemplate.js";
 
 // Get all approvals
 export const getAllApprovals = async (req, res) => {
@@ -127,7 +129,6 @@ export const approveExpense = async (req, res) => {
 
   const approval = await Approval.create(approvalData);
 
-  // Update expense status
   const update = {
     $set: { status },
   };
@@ -136,13 +137,31 @@ export const approveExpense = async (req, res) => {
     new: true,
   });
 
-  // Add approval to manager's approvals array
   await User.findByIdAndUpdate(req.user.userId, {
     $push: { approvals: approval._id },
   });
 
   if (!updatedExpense) {
     throw new NotFoundError("Expense not found");
+  }
+
+  const employee = await User.findById(expense.userId).select("name email");
+  const manager = await User.findById(req.user.userId).select("name email");
+
+  try {
+    await sendEmail({
+      to: employee.email,
+      subject: `Expense ${status === "approved" ? "Approved" : "Rejected"}`,
+      html: expenseStatusUpdateTemplate(
+        employee,
+        updatedExpense,
+        manager,
+        status,
+        rejectReason
+      ),
+    });
+  } catch (error) {
+    console.log("Email notification failed:", error);
   }
 
   res.status(StatusCodes.OK).json({
