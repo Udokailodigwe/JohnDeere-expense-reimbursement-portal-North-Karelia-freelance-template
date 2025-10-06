@@ -5,18 +5,19 @@ import { UnauthenticatedError } from "../errors/index.js";
 
 export const authenticate = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    // Try to get token from HTTP-only cookie first
+    let token = req.cookies.token;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      throw new UnauthenticatedError("Authentication required");
+    // Fallback to Authorization header for backward compatibility
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        token = authHeader.split(" ")[1];
+      }
     }
 
-    const token = authHeader.split(" ")[1];
-
     if (!token) {
-      throw new UnauthenticatedError(
-        "Authentication Invalid, No token provided"
-      );
+      throw new UnauthenticatedError("Authentication required");
     }
 
     const payload = jwt.verify(token, process.env.JWT_SECRET);

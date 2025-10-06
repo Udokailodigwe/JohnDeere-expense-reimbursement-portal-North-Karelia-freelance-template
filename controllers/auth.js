@@ -68,15 +68,43 @@ export const login = async (req, res) => {
 
   const token = user.createJWT();
 
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 24 * 60 * 60 * 1000,
+    path: "/",
+  });
+
   res.status(StatusCodes.CREATED).json({
+    message: "Login successful",
+  });
+};
+
+export const getCurrentUser = async (req, res) => {
+  const user = req.user;
+
+  res.status(StatusCodes.OK).json({
     user: {
       name: user.name,
       email: user.email,
       role: user.role,
       active: user.active,
       approvals: user.approvals,
-      token,
     },
+  });
+};
+
+export const logout = async (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  });
+
+  res.status(StatusCodes.OK).json({
+    message: "Logged out successfully",
   });
 };
 

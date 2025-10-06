@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import expenseRoutes from "./routes/expense.js";
 import approvalRoutes from "./routes/approval.js";
@@ -10,8 +12,20 @@ import errorHandlerMiddleware from "./middleware/error-handler.js";
 dotenv.config();
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+
+// Simple CORS configuration - allows all origins with credentials
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
+app.use(helmet());
+
+app.use(express.json({ limit: "10mb" })); // Limit JSON payload size
+app.use(cookieParser()); // Parse cookies
+
+// Basic security middleware
 
 // Routes
 app.use("/api/v1/approvals", approvalRoutes);
