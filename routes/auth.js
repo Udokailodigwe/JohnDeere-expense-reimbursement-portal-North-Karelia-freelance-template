@@ -1,5 +1,11 @@
 import express from "express";
-import { login, activateAccount, register } from "../controllers/auth.js";
+import {
+  login,
+  logout,
+  getCurrentUser,
+  activateAccount,
+  register,
+} from "../controllers/auth.js";
 import { validate } from "../middleware/validate-request.js";
 import {
   registerValidationSchema,
@@ -42,6 +48,10 @@ router.post(
 );
 
 router.post("/login", validate(loginValidationSchema), login);
+
+router.get("/me", authenticate, getCurrentUser);
+
+router.post("/logout", logout);
 
 router.post(
   "/activate-account",
