@@ -25,7 +25,7 @@ This backend service provides a comprehensive REST API for expense management wi
 
 ### 💼 Business Logic
 
-- **Employee Registration**: Secure registration for John Deere contractors and drivers
+- **Employee Registration**: Secure registration for contractors and drivers
 - **Expense Management**: Full CRUD operations for expense submissions
 - **Approval Workflow**: Manager approval/rejection system with notifications
 - **Email Notifications**: Automated email notifications using Nodemailer
@@ -80,12 +80,12 @@ This backend service provides a comprehensive REST API for expense management wi
    # Email Configuration
    EMAIL_HOST=smtp.gmail.com
    EMAIL_PORT=587
-   EMAIL_USER=your_email@domain.com
+   EMAIL_USER=your_email@example.com
    EMAIL_PASS=your_app_password
-   EMAIL_FROM=noreply@yourdomain.com
+   EMAIL_FROM=noreply@example.com
 
    # CORS Configuration
-   ALLOWED_ORIGINS=http://localhost:3000,https://yourdomain.com
+   ALLOWED_ORIGINS=http://localhost:3000,https://example.com
    ```
 
 4. **Start the server**
@@ -226,9 +226,9 @@ Email settings are configured via environment variables:
 ```env
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
-EMAIL_USER=your_email@domain.com
+EMAIL_USER=your_email@example.com
 EMAIL_PASS=your_app_password
-EMAIL_FROM=noreply@yourdomain.com
+EMAIL_FROM=noreply@example.com
 ```
 
 ### Supported Email Providers
@@ -368,14 +368,14 @@ PORT=5000
 MONGO_URI=your_production_mongodb_connection_string
 JWT_SECRET=your_super_secret_jwt_key
 NODE_ENV=production
-ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+ALLOWED_ORIGINS=https://example.com,https://www.example.com
 
 # Email Configuration
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
-EMAIL_USER=your_email@domain.com
+EMAIL_USER=your_email@example.com
 EMAIL_PASS=your_app_password
-EMAIL_FROM=noreply@yourdomain.com
+EMAIL_FROM=noreply@example.com
 ```
 
 ## 📊 API Status Codes
@@ -416,7 +416,7 @@ npm run test:coverage # Run tests with coverage report
 
 ## 📝 License
 
-This project is proprietary software for John Deere. All rights reserved.
+This project is proprietary software. All rights reserved.
 
 ## 📞 Support
 
