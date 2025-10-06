@@ -37,8 +37,8 @@ export const getExpensesQuerySchema = Joi.object({
     .optional(),
   startDate: Joi.date().iso().optional(),
   endDate: Joi.date().iso().optional(),
-  page: Joi.number().integer().min(1).optional().default(1),
-  limit: Joi.number().integer().min(1).max(100).optional().default(10),
+  page: Joi.number().integer().min(1).optional(),
+  limit: Joi.number().integer().min(1).max(100).optional(),
 }).unknown(false);
 
 export const getAllEmployeeExpensesQuerySchema = Joi.object({
@@ -56,8 +56,8 @@ export const getAllEmployeeExpensesQuerySchema = Joi.object({
   startDate: Joi.date().iso().optional(),
   endDate: Joi.date().iso().optional(),
   userId: objectId.optional(), // Allow filtering by specific user
-  page: Joi.number().integer().min(1).optional().default(1),
-  limit: Joi.number().integer().min(1).max(100).optional().default(10),
+  page: Joi.number().integer().min(1).optional(),
+  limit: Joi.number().integer().min(1).max(100).optional(),
 }).unknown(false);
 
 export const getExpenseByIdSchema = Joi.object({
