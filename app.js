@@ -18,7 +18,7 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
       .map((o) => o.trim())
       .filter(Boolean)
-  : ["https://dev.d34ysospagev6q.amplifyapp.com", "http://localhost:3000"];
+  : ["https://main.d2jc1kamdtvhjd.amplifyapp.com", "http://localhost:3000"];
 
 // Simple CORS configuration - allows all origins with credentials
 app.use(
