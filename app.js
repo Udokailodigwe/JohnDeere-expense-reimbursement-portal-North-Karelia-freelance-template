@@ -13,13 +13,17 @@ dotenv.config();
 
 const app = express();
 
+// Configure allowed origins from env (comma-separated) with sensible defaults
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",")
+      .map((o) => o.trim())
+      .filter(Boolean)
+  : ["https://dev.d34ysospagev6q.amplifyapp.com", "http://localhost:3000"];
+
 // Simple CORS configuration - allows all origins with credentials
 app.use(
   cors({
-    origin: [
-      "https://dev.d34ysospagev6q.amplifyapp.com",
-      "http://localhost:3000",
-    ],
+    origin: allowedOrigins,
     credentials: true,
   })
 );
