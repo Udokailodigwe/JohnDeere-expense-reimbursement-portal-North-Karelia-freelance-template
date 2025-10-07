@@ -16,7 +16,10 @@ const app = express();
 // Simple CORS configuration - allows all origins with credentials
 app.use(
   cors({
-    origin: true,
+    origin: [
+      "https://dev.d34ysospagev6q.amplifyapp.com",
+      "http://localhost:3000",
+    ],
     credentials: true,
   })
 );
